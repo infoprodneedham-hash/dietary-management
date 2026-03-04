@@ -8,8 +8,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const statsContainer = document.getElementById('statsContainer');
     const statsOutput = document.getElementById('statsOutput');
     const refreshBtn = document.getElementById('refreshBtn');
+    const historyList = document.getElementById('historyList');
 
-    // 1. Generate the HTML (Same as before)
+    // State array to hold multiple saved weeks
+    let savedHistory = JSON.parse(localStorage.getItem('weeklyDietHistory')) || [];
+
+    // 1. Generate the HTML Layout
     days.forEach(day => {
         const dayDiv = document.createElement('div');
         dayDiv.className = 'day-accordion';
@@ -60,124 +64,133 @@ document.addEventListener('DOMContentLoaded', () => {
         container.appendChild(dayDiv);
     });
 
-    // 2. Load Saved Data on Startup
-    const loadSavedData = () => {
-        const savedData = JSON.parse(localStorage.getItem('weeklyDietTracker'));
-        if (savedData) {
-            Object.keys(savedData).forEach(key => {
-                const elements = form.elements[key];
-                if (elements) {
-                    if (elements.type === 'radio') {
-                        // Handle radio buttons
-                        const radio = Array.from(form.elements[key]).find(r => r.value === savedData[key]);
-                        if (radio) radio.checked = true;
-                    } else {
-                        // Handle text, range, and select inputs
-                        elements.value = savedData[key];
-                        // Update range slider text display if applicable
-                        if (elements.type === 'range') {
-                            elements.nextElementSibling.innerText = savedData[key];
-                        }
-                    }
-                }
-            });
-            // Automatically generate stats for loaded data
-            generateStats(savedData);
-        }
-    };
-    loadSavedData();
-
-    // 3. Refresh Button Logic
+    // 2. Refresh / Hard Clear Button Logic
     refreshBtn.addEventListener('click', () => {
-        form.reset();
-        // Reset all range slider span texts back to 3
-        document.querySelectorAll('input[type="range"]').forEach(range => {
+        // Force clear all text inputs
+        form.querySelectorAll('input[type="text"]').forEach(input => input.value = '');
+        // Force uncheck all radio buttons
+        form.querySelectorAll('input[type="radio"]').forEach(radio => radio.checked = false);
+        // Force clear all select dropdowns
+        form.querySelectorAll('select').forEach(select => select.value = '');
+        // Force reset all range sliders to 3
+        form.querySelectorAll('input[type="range"]').forEach(range => {
+            range.value = 3;
             range.nextElementSibling.innerText = "3";
         });
-        statsContainer.style.display = 'none'; // Hide stats when refreshed
+        
+        statsContainer.style.display = 'none';
+        
+        // Collapse all open menus for a fresh start
+        document.querySelectorAll('.day-content.active').forEach(content => {
+            content.classList.remove('active');
+        });
     });
 
-    // 4. Save and Generate Stats Logic
+    // 3. Save and Analyze Logic
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         
-        // Gather all form data
         const formData = new FormData(form);
         const dataObj = Object.fromEntries(formData.entries());
         
-        // Save to browser LocalStorage
-        localStorage.setItem('weeklyDietTracker', JSON.stringify(dataObj));
+        // Add a timestamp and unique ID so we can tell saves apart
+        dataObj.timestamp = new Date().toLocaleString();
+        dataObj.id = Date.now().toString();
         
-        // Generate the statistics
+        // Add to history array and save to local storage
+        savedHistory.push(dataObj);
+        localStorage.setItem('weeklyDietHistory', JSON.stringify(savedHistory));
+        
         generateStats(dataObj);
+        renderHistory();
     });
 
+    // 4. Populate Form from a Specific Save
+    window.loadPastSave = (id) => {
+        const entry = savedHistory.find(item => item.id === id);
+        if (!entry) return;
+
+        Object.keys(entry).forEach(key => {
+            if(key === 'timestamp' || key === 'id') return; // Skip our metadata
+
+            const elements = form.elements[key];
+            if (elements) {
+                if (elements.type === 'radio') {
+                    const radio = Array.from(form.elements[key]).find(r => r.value === entry[key]);
+                    if (radio) radio.checked = true;
+                } else {
+                    elements.value = entry[key];
+                    if (elements.type === 'range') {
+                        elements.nextElementSibling.innerText = entry[key];
+                    }
+                }
+            }
+        });
+        generateStats(entry);
+        alert(`Loaded plan from ${entry.timestamp}`);
+    };
+
+    // 5. Render History List
+    function renderHistory() {
+        historyList.innerHTML = ''; // Clear list
+        if (savedHistory.length === 0) {
+            historyList.innerHTML = '<li>No past submissions found.</li>';
+            return;
+        }
+
+        // Display newest saves at the top
+        const reversedHistory = [...savedHistory].reverse();
+        
+        reversedHistory.forEach(entry => {
+            const li = document.createElement('li');
+            li.className = 'history-item';
+            li.innerHTML = `
+                <span><strong>Saved:</strong> ${entry.timestamp}</span>
+                <button type="button" class="load-btn" onclick="loadPastSave('${entry.id}')">Load & Review</button>
+            `;
+            historyList.appendChild(li);
+        });
+    }
+
+    // 6. Generate Statistics (Same as before)
     function generateStats(data) {
         let healthCounts = { 'Light': 0, 'Medium': 0, 'Heavy': 0 };
         let bevCounts = {};
         let totalRating = 0;
         let ratingCount = 0;
 
-        // Tally up the data
         for (const [key, value] of Object.entries(data)) {
-            if (key.includes('-health') && value) {
-                healthCounts[value]++;
-            }
+            if (key.includes('-health') && value) healthCounts[value]++;
             if (key.includes('-rating') && value) {
                 totalRating += parseInt(value);
                 ratingCount++;
             }
-            if (key.includes('-bev-') && value) {
-                bevCounts[value] = (bevCounts[value] || 0) + 1;
-            }
+            if (key.includes('-bev-') && value) bevCounts[value] = (bevCounts[value] || 0) + 1;
         }
 
-        // Rank Healthiness
-        const rankedHealth = Object.entries(healthCounts)
-            .sort((a, b) => b[1] - a[1]) // Sort highest to lowest
-            .filter(item => item[1] > 0); // Only show ones greater than 0
-
-        // Rank Beverages
-        const rankedBevs = Object.entries(bevCounts)
-            .sort((a, b) => b[1] - a[1]);
-
-        // Calculate Average Rating
+        const rankedHealth = Object.entries(healthCounts).sort((a, b) => b[1] - a[1]).filter(item => item[1] > 0);
+        const rankedBevs = Object.entries(bevCounts).sort((a, b) => b[1] - a[1]);
         const avgRating = ratingCount > 0 ? (totalRating / ratingCount).toFixed(1) : "N/A";
 
-        // Build the HTML Output
-        let statsHTML = '';
-
-        // Meal Profile Stats
-        statsHTML += `<div class="stat-box"><h3>🍽️ Meal Profile Ranking</h3>`;
+        let statsHTML = `<div class="stat-box"><h3>🍽️ Meal Profile Ranking</h3>`;
         if (rankedHealth.length > 0) {
-            rankedHealth.forEach((item, index) => {
-                statsHTML += `<p class="rank-${index + 1}">#${index + 1} ${item[0]} Meals: ${item[1]}</p>`;
-            });
+            rankedHealth.forEach((item, index) => statsHTML += `<p class="rank-${index + 1}">#${index + 1} ${item[0]} Meals: ${item[1]}</p>`);
         } else {
-            statsHTML += `<p>No meals logged yet.</p>`;
+            statsHTML += `<p>No meals logged.</p>`;
         }
-        statsHTML += `</div>`;
-
-        // Beverage Stats
-        statsHTML += `<div class="stat-box"><h3>🥤 Top Beverages</h3>`;
+        statsHTML += `</div><div class="stat-box"><h3>🥤 Top Beverages</h3>`;
         if (rankedBevs.length > 0) {
-            rankedBevs.slice(0, 3).forEach((item, index) => { // Show top 3
-                statsHTML += `<p class="rank-${index + 1}">#${index + 1} ${item[0]}: ${item[1]} times</p>`;
-            });
+            rankedBevs.slice(0, 3).forEach((item, index) => statsHTML += `<p class="rank-${index + 1}">#${index + 1} ${item[0]}: ${item[1]} times</p>`);
         } else {
-            statsHTML += `<p>No beverages logged yet.</p>`;
+            statsHTML += `<p>No beverages logged.</p>`;
         }
-        statsHTML += `</div>`;
+        statsHTML += `</div><div class="stat-box"><h3>⭐ Overall Satisfaction</h3><p>Average Meal Rating: <strong>${avgRating} / 5</strong></p></div>`;
 
-        // Rating Stats
-        statsHTML += `<div class="stat-box"><h3>⭐ Overall Satisfaction</h3>
-                      <p>Average Meal Rating: <strong>${avgRating} / 5</strong></p></div>`;
-
-        // Inject and display
         statsOutput.innerHTML = statsHTML;
         statsContainer.style.display = 'block';
-        
-        // Scroll down to see the stats smoothly
         statsContainer.scrollIntoView({ behavior: 'smooth' });
     }
+
+    // Initialize history on page load
+    renderHistory();
 });
