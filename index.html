@@ -17,8 +17,16 @@
         <form id="dietForm">
             <div id="daysContainer"></div>
             
-            <button type="submit" class="submit-btn">Save Weekly Plan</button>
+            <div class="button-group">
+                <button type="button" id="refreshBtn" class="refresh-btn">Refresh</button>
+                <button type="submit" class="submit-btn">Save & Analyze</button>
+            </div>
         </form>
+
+        <div id="statsContainer" class="stats-container">
+            <h2>Weekly Statistics</h2>
+            <div id="statsOutput"></div>
+        </div>
     </div>
 
     <script src="script.js"></script>
