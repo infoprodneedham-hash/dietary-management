@@ -157,4 +157,74 @@ select {
 
 .submit-btn:hover {
     background-color: #b1b8d6;
+
 }
+
+/* Button Group Styles */
+.button-group {
+    display: flex;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.refresh-btn {
+    flex: 1;
+    padding: 18px;
+    background-color: #f0f0f0;
+    color: var(--text-dark);
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1.2em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.refresh-btn:hover {
+    background-color: #e4e4e4;
+}
+
+.submit-btn {
+    flex: 2;
+    margin-top: 0; /* Resetting from previous CSS */
+}
+
+/* Statistics Dashboard Styles */
+.stats-container {
+    display: none; /* Hidden until saved */
+    margin-top: 40px;
+    padding: 25px;
+    background-color: var(--pastel-mint);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.stats-container h2 {
+    margin-top: 0;
+    color: #2c4c3b;
+    text-align: center;
+    border-bottom: 2px solid rgba(255,255,255,0.5);
+    padding-bottom: 10px;
+}
+
+.stat-box {
+    background: #fff;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+}
+
+.stat-box h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.1em;
+    color: #444;
+}
+
+.stat-box p {
+    margin: 5px 0;
+    font-size: 0.95em;
+}
+
+.rank-1 { font-weight: bold; color: #d9534f; }
+.rank-2 { color: #f0ad4e; }
+.rank-3 { color: #5bc0de; }
