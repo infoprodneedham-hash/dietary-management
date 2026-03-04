@@ -1,0 +1,160 @@
+:root {
+    --bg-color: #fcfcfc;
+    --container-bg: #ffffff;
+    --pastel-mint: #b5ead7;
+    --pastel-peach: #ffdac1;
+    --pastel-lavender: #c7ceea;
+    --text-dark: #444;
+    --border-light: #eaeaea;
+}
+
+* {
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-dark);
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: var(--container-bg);
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* Accordion Styles */
+.day-accordion {
+    margin-bottom: 15px;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.day-header {
+    background-color: var(--pastel-mint);
+    padding: 18px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.2em;
+    transition: background 0.2s ease;
+}
+
+.day-header:hover {
+    background-color: #a3d9c5;
+}
+
+.day-content {
+    display: none;
+    padding: 20px;
+    background-color: #fafafa;
+}
+
+.day-content.active {
+    display: block; /* Shows the content when the JS toggles the active class */
+}
+
+/* Meal Section Styles */
+.meal-row {
+    background: #fff;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border-left: 6px solid var(--pastel-peach);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+}
+
+.meal-row h4 {
+    margin: 0 0 10px 0;
+    color: #333;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1em;
+    margin-bottom: 12px;
+}
+
+.controls-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+    font-size: 0.95em;
+}
+
+.radio-group, .rating-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+input[type="range"] {
+    cursor: pointer;
+}
+
+/* Beverage Section Styles */
+.beverage-section {
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 6px solid var(--pastel-lavender);
+}
+
+.bev-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 2 columns on desktop */
+    gap: 15px;
+}
+
+select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1em;
+}
+
+/* Mobile Responsiveness */
+@media(max-width: 600px) {
+    .bev-grid {
+        grid-template-columns: 1fr; /* 1 column on mobile */
+    }
+    .controls-group {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+.submit-btn {
+    display: block;
+    width: 100%;
+    padding: 18px;
+    background-color: var(--pastel-lavender);
+    color: #333;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.2em;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 25px;
+    transition: background 0.3s ease;
+}
+
+.submit-btn:hover {
+    background-color: #b1b8d6;
+}
