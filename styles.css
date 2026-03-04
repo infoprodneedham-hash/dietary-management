@@ -228,3 +228,51 @@ select {
 .rank-1 { font-weight: bold; color: #d9534f; }
 .rank-2 { color: #f0ad4e; }
 .rank-3 { color: #5bc0de; }
+
+/* History Section Styles */
+.history-container {
+    margin-top: 30px;
+    padding: 25px;
+    background-color: #f9f9f9;
+    border-radius: 12px;
+    border: 1px solid var(--border-light);
+}
+
+.history-container h2 {
+    margin-top: 0;
+    color: #444;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 10px;
+}
+
+.history-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border-left: 6px solid #ccc;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+}
+
+.load-btn {
+    padding: 8px 16px;
+    background-color: var(--pastel-mint);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+.load-btn:hover {
+    background-color: #a3d9c5;
+}
